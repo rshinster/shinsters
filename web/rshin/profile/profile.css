@@ -49,5 +49,9 @@
   .marquee.is-moving > ul { animation: none; }
 }
 
-.skills { display: flex; flex-wrap: wrap; gap: 6px; }
-.skills span { font-size: 14px; padding: 2px 10px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); }
+.skills { display: grid; gap: 14px; }
+.skill-group { display: grid; grid-template-columns: 110px 1fr; gap: 12px; align-items: baseline; }
+.skill-group h3 { font-size: 14px; color: var(--muted); font-weight: 600; }
+.skill-group p { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
+.skill-group span { font-size: 14px; padding: 2px 10px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); }
+@media (max-width: 480px) { .skill-group { grid-template-columns: 1fr; gap: 6px; } }
