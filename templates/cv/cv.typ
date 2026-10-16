@@ -77,6 +77,16 @@
 #section("Profil")
 #val(data.profile)
 
+#section("Compétences")
+#grid(
+  columns: (auto, 1fr),
+  column-gutter: 0.8em,
+  row-gutter: 0.75em * gap,
+  ..data.skills.map(s => (text(weight: "bold", s.label), val(s.items))).flatten(),
+  text(weight: "bold", "Langues"), val(data.languages),
+  ..if "others" in data { (text(weight: "bold", "Autres"), val(data.others)) } else { () },
+)
+
 #section("Projets")
 #{
   for p in data.projects {
@@ -103,13 +113,3 @@
 #for e in data.education {
   entry(val(e.degree), val(e.dates), sub: e.school)
 }
-
-#section("Compétences")
-#grid(
-  columns: (auto, 1fr),
-  column-gutter: 0.8em,
-  row-gutter: 0.75em * gap,
-  ..data.skills.map(s => (text(weight: "bold", s.label), val(s.items))).flatten(),
-  text(weight: "bold", "Langues"), val(data.languages),
-  ..if "others" in data { (text(weight: "bold", "Autres"), val(data.others)) } else { () },
-)
