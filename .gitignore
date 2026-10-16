@@ -1,0 +1,81 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+.yarn/cache/
+.venv/
+venv/
+vendor/
+
+# Build output
+dist/
+build/
+out/
+.next/
+.nuxt/
+.svelte-kit/
+.output/
+*.tsbuildinfo
+bin/
+target/
+
+# Caches
+.cache/
+.parcel-cache/
+.turbo/
+.eslintcache
+.stylelintcache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Test / coverage output
+coverage/
+.nyc_output/
+htmlcov/
+.coverage
+.coverage.*
+*.lcov
+
+# Logs and temp files
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+tmp/
+*.tmp
+*.swp
+*.swo
+*~
+
+# Terraform
+.terraform/
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+
+# Personal CV data and its generated PDF
+content/
+web/rshin/profile/resume.pdf
