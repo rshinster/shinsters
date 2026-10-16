@@ -84,4 +84,13 @@ a { color: var(--accent); text-decoration: none; }
 }
 .btn:hover { border-color: var(--accent); }
 
+.legal { flex: 1; padding: 40px 0; }
+.legal h1 { font-size: clamp(28px, 6vw, 40px); line-height: 1.15; margin: 0 0 8px; }
+.legal h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 36px 0 10px; }
+.legal p { margin: 0 0 12px; }
+.legal .updated { color: var(--muted); font-size: 14px; }
+
+.placeholder { border-left: 3px solid #e0a800; padding-left: 10px; }
+
 footer { font-size: 13px; color: var(--muted); text-align: center; }
+footer a { color: inherit; text-decoration: underline; }

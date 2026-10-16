@@ -76,6 +76,7 @@ a.card:hover { border-color: var(--accent); text-decoration: none; transform: tr
 .placeholder { border-left: 3px solid #e0a800; padding-left: 10px; }
 
 footer { margin-top: 64px; font-size: 13px; color: var(--muted); }
+footer a { color: inherit; text-decoration: underline; }
 
 @media print {
   .site-nav, footer, .buttons { display: none; }
