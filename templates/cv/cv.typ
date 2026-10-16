@@ -2,16 +2,24 @@
 
 #let data = yaml(sys.inputs.at("data", default: "/content/cv/cv.yaml"))
 #let strict = sys.inputs.at("strict", default: "false") == "true"
+// Scales vertical gaps between blocks; tuned so the page is filled to the bottom margin.
+#let gap = float(sys.inputs.at("gap", default: "1.08"))
 
 #let accent = rgb("#1f3a68")
 #let muted = rgb("#5a5f6a")
 #let rule-color = rgb("#c9cfd9")
 
 #set document(title: data.person.name + " – CV", author: data.person.name)
-#set page(paper: "a4", margin: (x: 1.5cm, y: 1.3cm))
+#set page(
+  paper: "a4",
+  margin: (x: 1.5cm, y: 1.3cm),
+  footer: if "footnote" in data {
+    align(right, text(size: 7.5pt, fill: rgb("#9aa0aa"), style: "italic", data.footnote))
+  },
+)
 #set text(font: ("Noto Sans", "Liberation Sans", "DejaVu Sans"), size: 9.4pt, lang: "fr", fill: rgb("#1c1c1e"))
-#set par(leading: 0.93em, spacing: 1.125em, justify: false)
-#set list(indent: 0.2em, body-indent: 0.5em, spacing: 0.75em, marker: text(fill: accent)[•])
+#set par(leading: 0.93em, spacing: 1.125em * gap, justify: false)
+#set list(indent: 0.2em, body-indent: 0.5em, spacing: 0.75em * gap, marker: text(fill: accent)[•])
 #show link: it => it
 
 // Strings starting with "TODO" are highlighted, or stop the build in strict mode.
@@ -24,7 +32,7 @@
 }
 
 #let section(title) = {
-  v(1.8em, weak: true)
+  v(1.8em * gap, weak: true)
   grid(
     columns: (auto, 1fr),
     column-gutter: 0.6em,
@@ -32,19 +40,19 @@
     text(fill: accent, weight: "bold", size: 9.6pt, tracking: 0.08em, upper(title)),
     line(length: 100%, stroke: 0.5pt + rule-color),
   )
-  v(1.2em, weak: true)
+  v(1.2em * gap, weak: true)
 }
 
 #let entry(title, right, sub: none, body: none) = {
-  block(breakable: false, below: 1.3em, {
+  block(breakable: false, below: 1.3em * gap, {
     grid(
       columns: (1fr, auto),
       column-gutter: 1em,
       text(weight: "bold", title),
       text(fill: muted, size: 8.8pt, right),
     )
-    if sub != none { v(0.75em, weak: true); text(fill: muted, size: 8.8pt, sub) }
-    if body != none { v(0.9em, weak: true); body }
+    if sub != none { v(0.75em * gap, weak: true); text(fill: muted, size: 8.8pt, sub) }
+    if body != none { v(0.9em * gap, weak: true); body }
   })
 }
 
@@ -100,7 +108,7 @@
 #grid(
   columns: (auto, 1fr),
   column-gutter: 0.8em,
-  row-gutter: 0.75em,
+  row-gutter: 0.75em * gap,
   ..data.skills.map(s => (text(weight: "bold", s.label), val(s.items))).flatten(),
   text(weight: "bold", "Langues"), val(data.languages),
   ..if "others" in data { (text(weight: "bold", "Autres"), val(data.others)) } else { () },
