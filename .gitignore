@@ -76,6 +76,6 @@ desktop.ini
 *.tfvars
 !*.tfvars.example
 
-# Personal CV data and its generated PDF
+# Local data and generated files
 content/
 web/rshin/profile/resume.pdf

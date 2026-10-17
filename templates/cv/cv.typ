@@ -1,6 +1,6 @@
-// CV layout; content comes from content/cv/cv.yaml (built by `make cv`).
+// One-page CV layout; the content is passed as YAML with --input data=… (see `make cv`).
 
-#let data = yaml(sys.inputs.at("data", default: "/content/cv/cv.yaml"))
+#let data = yaml(sys.inputs.at("data"))
 #let strict = sys.inputs.at("strict", default: "false") == "true"
 // Scales vertical gaps between blocks; tuned so the page is filled to the bottom margin.
 #let gap = float(sys.inputs.at("gap", default: "1.08"))
@@ -26,7 +26,7 @@
 #let val(s) = {
   let s = str(s)
   if s.contains("TODO") {
-    assert(not strict, message: "unfilled TODO in cv.yaml: " + s)
+    assert(not strict, message: "unfilled TODO in CV data: " + s)
     highlight(fill: rgb("#ffe680"), s)
   } else { s }
 }
