@@ -7,10 +7,29 @@ RewriteCond %{HTTPS} off
 RewriteCond %{HTTP:X-Forwarded-Proto} !https
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
+# Static site: only reads are allowed
+RewriteCond %{REQUEST_METHOD} !^(GET|HEAD)$
+RewriteRule ^ - [F,L]
+
+# Scrapers, AI crawlers and SEO bots
+RewriteCond %{HTTP_USER_AGENT} ^-?$ [OR]
+RewriteCond %{HTTP_USER_AGENT} (GPTBot|ChatGPT-User|OAI-SearchBot|CCBot|ClaudeBot|anthropic-ai|Google-Extended|Bytespider|PerplexityBot|Amazonbot|meta-externalagent|AhrefsBot|SemrushBot|MJ12bot|DotBot|PetalBot|DataForSeoBot|BLEXBot) [NC]
+RewriteRule ^ - [F,L]
+
+# Probes for software this site doesn't run, and hidden files
+RewriteRule (^|/)\.(?!well-known/) - [R=404,L]
+RewriteRule (^|/)(wp-|wordpress|xmlrpc\.php|phpmyadmin|pma|admin|cgi-bin|vendor/|config\.php) - [NC,R=404,L]
+
 <IfModule mod_headers.c>
   Header always set X-Content-Type-Options "nosniff"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set X-Frame-Options "DENY"
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+  Header always set X-Robots-Tag "noindex, nofollow, noarchive, nosnippet"
+  <FilesMatch "\.html$">
+    Header always set Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+  </FilesMatch>
 </IfModule>
 
 <IfModule mod_expires.c>
