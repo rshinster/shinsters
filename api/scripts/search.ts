@@ -1,15 +1,12 @@
 import { existsSync } from "node:fs";
+import { ANONYMOUS } from "../src/access/viewer.ts";
 import { loadConfig } from "../src/config.ts";
 import { readIndex } from "../src/index/store.ts";
 import { resolveFromApiRoot } from "../src/paths.ts";
-import { createMiniSearchEngine } from "../src/search/minisearch-engine.ts";
-import { searchPages } from "../src/search/search-pages.ts";
+import { createToolContext } from "../src/tools/registry.ts";
+import { searchPagesTool } from "../src/tools/search-pages-tool.ts";
 
 const query = process.argv.slice(2).join(" ");
-if (!query.trim()) {
-  console.error('Usage: make api-search q="your words"');
-  process.exit(1);
-}
 
 const config = loadConfig(process.env);
 const indexPath = resolveFromApiRoot(config.indexPath);
@@ -18,14 +15,11 @@ if (!existsSync(indexPath)) {
   process.exit(1);
 }
 const pages = await readIndex(indexPath);
+const context = await createToolContext(pages, ANONYMOUS);
 
-const engine = await createMiniSearchEngine(pages);
-const results = await searchPages(engine, { query });
-
-if (results.length === 0) {
-  console.log(`No page matches "${query}".`);
-}
-for (const result of results) {
-  const score = result.score.toFixed(2);
-  console.log(`${score}  ${result.url}  ${result.title}`);
+// Same tool, validation and access rules as the model will use.
+const result = await searchPagesTool.call({ query }, context);
+console.log(JSON.stringify(result, null, 2));
+if (!result.ok) {
+  process.exit(1);
 }

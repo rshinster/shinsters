@@ -20,6 +20,7 @@
     "typescript": "^7.0.2"
   },
   "dependencies": {
-    "minisearch": "^7.2.0"
+    "minisearch": "^7.2.0",
+    "zod": "^4.6.7"
   }
 }

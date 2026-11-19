@@ -1,9 +1,12 @@
 import assert from "node:assert/strict";
 import { before, test } from "node:test";
+import { ANONYMOUS, type Viewer } from "../src/access/viewer.ts";
 import type { SearchEngine } from "../src/search/engine.ts";
 import { createMiniSearchEngine } from "../src/search/minisearch-engine.ts";
 import { searchPages } from "../src/search/search-pages.ts";
 import { PAGES } from "./fixtures/pages.ts";
+
+const MEMBER: Viewer = { kind: "member", id: "rshin" };
 
 let engine: SearchEngine;
 
@@ -11,8 +14,8 @@ before(async () => {
   engine = await createMiniSearchEngine(PAGES);
 });
 
-async function urlsFor(query: string, limit?: number): Promise<string[]> {
-  const results = await searchPages(engine, { query, limit });
+async function urlsFor(query: string, viewer: Viewer = ANONYMOUS): Promise<string[]> {
+  const results = await searchPages(engine, { query, limit: 5, viewer });
   return results.map((result) => result.url);
 }
 
@@ -64,12 +67,23 @@ test("unknown word gives no result", async () => {
   assert.deepEqual(urls, []);
 });
 
-test("empty query gives no result", async () => {
-  const urls = await urlsFor("   ");
+test("limit is respected", async () => {
+  const results = await searchPages(engine, { query: "webserv", limit: 1, viewer: ANONYMOUS });
+  assert.equal(results.length, 1);
+});
+
+test("private pages are hidden from anonymous viewers", async () => {
+  const urls = await urlsFor("roadmap");
   assert.deepEqual(urls, []);
 });
 
-test("limit is respected", async () => {
-  const urls = await urlsFor("webserv", 1);
-  assert.equal(urls.length, 1);
+test("private pages are visible to members", async () => {
+  const urls = await urlsFor("roadmap", MEMBER);
+  assert.deepEqual(urls, ["/members/roadmap/"]);
+});
+
+test("hidden pages do not use up the limit", async () => {
+  const results = await searchPages(engine, { query: "docker", limit: 1, viewer: ANONYMOUS });
+  const urls = results.map((result) => result.url);
+  assert.deepEqual(urls, ["/notes/docker/"]);
 });

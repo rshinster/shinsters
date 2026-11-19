@@ -1,6 +1,6 @@
 import MiniSearch from "minisearch";
 import type { Page } from "../index/page.ts";
-import type { SearchEngine, SearchResult } from "./engine.ts";
+import type { EngineSearchOptions, SearchEngine, SearchResult } from "./engine.ts";
 
 const SEARCH_FIELDS = ["title", "headings", "description", "text"];
 
@@ -15,7 +15,7 @@ export async function createMiniSearchEngine(pages: Page[]): Promise<SearchEngin
   const index = new MiniSearch<Page>({
     idField: "url",
     fields: SEARCH_FIELDS,
-    storeFields: ["url", "title", "description"],
+    storeFields: ["url", "title", "description", "visibility"],
     extractField: readField,
     processTerm: normalizeTerm,
     searchOptions: {
@@ -27,17 +27,19 @@ export async function createMiniSearchEngine(pages: Page[]): Promise<SearchEngin
   index.addAll(pages);
 
   return {
-    async search(query: string, limit: number): Promise<SearchResult[]> {
+    async search(query: string, options: EngineSearchOptions): Promise<SearchResult[]> {
       const hits = index.search(query);
-      const top = hits.slice(0, limit);
-      return top.map((hit) => {
+      const results = hits.map((hit) => {
         return {
           url: hit.url,
           title: hit.title,
           description: hit.description,
+          visibility: hit.visibility,
           score: hit.score,
         };
       });
+      const accepted = results.filter(options.accept);
+      return accepted.slice(0, options.limit);
     },
   };
 }

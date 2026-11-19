@@ -1,3 +1,4 @@
+import { canView, type Viewer } from "../access/viewer.ts";
 import type { SearchEngine, SearchResult } from "./engine.ts";
 
 export const DEFAULT_LIMIT = 5;
@@ -5,26 +6,17 @@ export const MAX_LIMIT = 10;
 
 export interface SearchPagesOptions {
   query: string;
-  limit?: number;
+  limit: number;
+  viewer: Viewer;
 }
 
-// Input rules for the search_pages tool, independent of the engine.
+// Expects validated input (see the search_pages tool); filters out pages the viewer may not see.
 export async function searchPages(
   engine: SearchEngine,
   options: SearchPagesOptions,
 ): Promise<SearchResult[]> {
-  const query = options.query.trim();
-  if (!query) {
-    return [];
-  }
-  const limit = clampLimit(options.limit);
-  return engine.search(query, limit);
-}
-
-function clampLimit(limit: number | undefined): number {
-  if (limit === undefined) {
-    return DEFAULT_LIMIT;
-  }
-  const whole = Math.floor(limit);
-  return Math.min(Math.max(whole, 1), MAX_LIMIT);
+  return engine.search(options.query, {
+    limit: options.limit,
+    accept: (result) => canView(options.viewer, result),
+  });
 }

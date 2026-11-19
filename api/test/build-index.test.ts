@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { test } from "node:test";
@@ -46,6 +46,18 @@ test("writes and reads back the index", async () => {
     await writeIndex(file, pages);
     const readBack = await readIndex(file);
     assert.deepEqual(readBack, pages);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("rejects an index file with invalid pages", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "shinsters-index-"));
+  try {
+    const file = path.join(dir, "pages.json");
+    const invalid = [{ url: "no-leading-slash", title: "x", visibility: "secret" }];
+    await writeFile(file, JSON.stringify(invalid));
+    await assert.rejects(readIndex(file), /invalid index file/);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

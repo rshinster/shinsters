@@ -40,4 +40,13 @@ export const PAGES: Page[] = [
     text: "Éditeur du site. Hébergeur. Aucune donnée personnelle n'est collectée.",
     visibility: "public",
   },
+  {
+    url: "/members/roadmap/",
+    title: "Members roadmap",
+    description: "Private plans.",
+    lang: "en",
+    headings: ["Roadmap"],
+    text: "Secret roadmap: docker swarm migration.",
+    visibility: "private",
+  },
 ];
