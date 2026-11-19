@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "node --test \"test/**/*.test.ts\"",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "index": "node scripts/build-index.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",

@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { loadConfig } from "../src/config.ts";
 
-const DEFAULTS = { port: 3000, indexPath: "data/pages.json" };
+const DEFAULTS = { port: 3000, indexPath: "data/pages.json", webRoot: "../web" };
 
 test("defaults when env is empty", () => {
   const config = loadConfig({});
@@ -10,13 +10,17 @@ test("defaults when env is empty", () => {
 });
 
 test("defaults when variables are set but empty", () => {
-  const config = loadConfig({ PORT: "", INDEX_PATH: "" });
+  const config = loadConfig({ PORT: "", INDEX_PATH: "", WEB_ROOT: "" });
   assert.deepEqual(config, DEFAULTS);
 });
 
 test("reads values from env", () => {
-  const config = loadConfig({ PORT: "8081", INDEX_PATH: "/tmp/pages.json" });
-  assert.deepEqual(config, { port: 8081, indexPath: "/tmp/pages.json" });
+  const config = loadConfig({
+    PORT: "8081",
+    INDEX_PATH: "/tmp/pages.json",
+    WEB_ROOT: "/srv/web",
+  });
+  assert.deepEqual(config, { port: 8081, indexPath: "/tmp/pages.json", webRoot: "/srv/web" });
 });
 
 test("accepts the port range limits", () => {
