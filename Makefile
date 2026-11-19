@@ -3,7 +3,7 @@ TYPST ?= typst
 CV_PDF := web/rshin/profile/resume.pdf
 CV_ARGS := --root . --input data=/content/cv/cv.yaml templates/cv/cv.typ $(CV_PDF)
 
-.PHONY: serve cv cv-watch cv-final api-install api-test api-check api-index api-search api-lint api-format api-mcp api-inspect api-chat api-eval verify
+.PHONY: serve cv cv-watch cv-final api-install api-test api-check api-index api-search api-lint api-format api-mcp api-inspect api-chat api-eval api-serve verify
 
 serve:
 	python3 -m http.server $(PORT) -d web
@@ -50,6 +50,9 @@ api-chat:
 # Calls the real model (not part of verify). EVAL_RUNS=3 repeats each case.
 api-eval:
 	cd api && npm run -s eval
+
+api-serve:
+	cd api && npm run -s serve
 
 # Run before each commit; read-only except the git-ignored index.
 verify: api-lint api-check api-test api-index
