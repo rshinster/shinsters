@@ -32,6 +32,11 @@ make api-index    # index the pages of web/ into api/data/pages.json
 make api-search q="webserv"  # search the index from the terminal
 make api-mcp      # run the MCP server over stdio (for MCP clients)
 make api-inspect  # open MCP Inspector in the browser to try the tools
+make api-chat     # chat with the guide agent in the terminal (local Ollama by default)
 ```
+
+The agent talks to any OpenAI-compatible chat API, set with `MODEL_BASE_URL`, `MODEL_NAME`,
+`MODEL_API_KEY` (optional) and `MODEL_REASONING_EFFORT` (`omit` to leave it out).
+Defaults: a local [Ollama](https://ollama.com) with `qwen3:14b` and reasoning off.
 
 Before each commit, run `make verify` (lint, type-check, tests, index of the real pages).

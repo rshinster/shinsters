@@ -2,7 +2,19 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { loadConfig } from "../src/config.ts";
 
-const DEFAULTS = { port: 3000, indexPath: "data/pages.json", webRoot: "../web" };
+const DEFAULT_MODEL = {
+  baseUrl: "http://localhost:11434/v1",
+  name: "qwen3:14b",
+  apiKey: "",
+  reasoningEffort: "none",
+};
+
+const DEFAULTS = {
+  port: 3000,
+  indexPath: "data/pages.json",
+  webRoot: "../web",
+  model: DEFAULT_MODEL,
+};
 
 test("defaults when env is empty", () => {
   const config = loadConfig({});
@@ -10,7 +22,15 @@ test("defaults when env is empty", () => {
 });
 
 test("defaults when variables are set but empty", () => {
-  const config = loadConfig({ PORT: "", INDEX_PATH: "", WEB_ROOT: "" });
+  const config = loadConfig({
+    PORT: "",
+    INDEX_PATH: "",
+    WEB_ROOT: "",
+    MODEL_BASE_URL: "",
+    MODEL_NAME: "",
+    MODEL_API_KEY: "",
+    MODEL_REASONING_EFFORT: "",
+  });
   assert.deepEqual(config, DEFAULTS);
 });
 
@@ -19,8 +39,22 @@ test("reads values from env", () => {
     PORT: "8081",
     INDEX_PATH: "/tmp/pages.json",
     WEB_ROOT: "/srv/web",
+    MODEL_BASE_URL: "https://models.example/v1",
+    MODEL_NAME: "some-model",
+    MODEL_API_KEY: "test-key",
+    MODEL_REASONING_EFFORT: "low",
   });
-  assert.deepEqual(config, { port: 8081, indexPath: "/tmp/pages.json", webRoot: "/srv/web" });
+  assert.deepEqual(config, {
+    port: 8081,
+    indexPath: "/tmp/pages.json",
+    webRoot: "/srv/web",
+    model: {
+      baseUrl: "https://models.example/v1",
+      name: "some-model",
+      apiKey: "test-key",
+      reasoningEffort: "low",
+    },
+  });
 });
 
 test("accepts the port range limits", () => {
