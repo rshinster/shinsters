@@ -25,6 +25,10 @@ Requires Node 26 (`api/.nvmrc`). TypeScript runs natively, with no build step.
 make api-install  # install dependencies
 make api-test     # run the tests
 make api-check    # type-check
+make api-lint     # check formatting and lint rules (Biome, read-only)
+make api-format   # apply Biome formatting and safe fixes
 make api-index    # index the pages of web/ into api/data/pages.json
 make api-search q="webserv"  # search the index from the terminal
 ```
+
+Before each commit, run `make verify` (lint, type-check, tests, index of the real pages).

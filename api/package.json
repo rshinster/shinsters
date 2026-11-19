@@ -10,9 +10,12 @@
     "test": "node --test \"test/**/*.test.ts\"",
     "check": "tsc --noEmit",
     "index": "node scripts/build-index.ts",
-    "search": "node scripts/search.ts"
+    "search": "node scripts/search.ts",
+    "lint": "biome check .",
+    "format": "biome check --write ."
   },
   "devDependencies": {
+    "@biomejs/biome": "2.6.8",
     "@types/node": "^26.6.6",
     "typescript": "^7.0.2"
   },

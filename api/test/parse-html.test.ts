@@ -1,5 +1,5 @@
-import { test } from "node:test";
 import assert from "node:assert/strict";
+import { test } from "node:test";
 import { parseHtml } from "../src/index/parse-html.ts";
 
 const PAGE = `<!doctype html>

@@ -1,5 +1,5 @@
-import { before, test } from "node:test";
 import assert from "node:assert/strict";
+import { before, test } from "node:test";
 import type { SearchEngine } from "../src/search/engine.ts";
 import { createMiniSearchEngine } from "../src/search/minisearch-engine.ts";
 import { searchPages } from "../src/search/search-pages.ts";

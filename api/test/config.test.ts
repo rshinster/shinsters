@@ -1,5 +1,5 @@
-import { test } from "node:test";
 import assert from "node:assert/strict";
+import { test } from "node:test";
 import { loadConfig } from "../src/config.ts";
 
 const DEFAULTS = { port: 3000, indexPath: "data/pages.json", webRoot: "../web" };

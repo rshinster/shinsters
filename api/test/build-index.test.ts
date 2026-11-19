@@ -1,8 +1,8 @@
-import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { test } from "node:test";
 import { buildIndex, toUrl } from "../src/index/build-index.ts";
 import { readIndex, writeIndex } from "../src/index/store.ts";
 
