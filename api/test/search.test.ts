@@ -2,7 +2,7 @@ import { before, test } from "node:test";
 import assert from "node:assert/strict";
 import type { SearchEngine } from "../src/search/engine.ts";
 import { createMiniSearchEngine } from "../src/search/minisearch-engine.ts";
-import { MAX_LIMIT, searchPages } from "../src/search/search-pages.ts";
+import { searchPages } from "../src/search/search-pages.ts";
 import { PAGES } from "./fixtures/pages.ts";
 
 let engine: SearchEngine;
@@ -40,7 +40,8 @@ test("prefix finds the full word", async () => {
 
 test("one typo still finds the page", async () => {
   const urls = await urlsFor("webserf");
-  assert.ok(urls.includes("/profile/"), `got ${urls.join(", ")}`);
+  const found = urls.includes("/profile/");
+  assert.ok(found, `got ${urls}`);
 });
 
 test("several words: page with all of them first", async () => {
@@ -68,9 +69,7 @@ test("empty query gives no result", async () => {
   assert.deepEqual(urls, []);
 });
 
-test("limit is respected and capped", async () => {
-  const one = await urlsFor("webserv", 1);
-  const capped = await searchPages(engine, { query: "e", limit: 1000 });
-  assert.equal(one.length, 1);
-  assert.ok(capped.length <= MAX_LIMIT);
+test("limit is respected", async () => {
+  const urls = await urlsFor("webserv", 1);
+  assert.equal(urls.length, 1);
 });

@@ -30,4 +30,4 @@ api-index:
 	cd api && npm run index
 
 api-search:
-	cd api && npm run -s search -- "$(q)"
+	cd api && npm run -s search -- "$$q"

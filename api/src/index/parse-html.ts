@@ -18,6 +18,8 @@ const ENTITIES: Record<string, string> = {
   "&nbsp;": " ",
 };
 
+const MAX_CODE_POINT = 0x10ffff;
+
 export function parseHtml(html: string): ParsedHtml {
   return {
     title: cleanText(firstGroup(html, /<title[^>]*>([\s\S]*?)<\/title>/i)),
@@ -51,11 +53,14 @@ function readHeadings(html: string): string[] {
   return headings;
 }
 
+// Nav and footer repeat on every page, so they would make every page match their words.
+const NON_CONTENT = /<(script|style|nav|footer)\b[^>]*>[\s\S]*?<\/\1>/gi;
+
 function readBodyText(html: string): string {
   const body = firstGroup(html, /<body[^>]*>([\s\S]*)<\/body>/i) || html;
   const withoutComments = body.replace(/<!--[\s\S]*?-->/g, " ");
-  const withoutScripts = withoutComments.replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, " ");
-  return cleanText(withoutScripts);
+  const content = withoutComments.replace(NON_CONTENT, " ");
+  return cleanText(content);
 }
 
 function cleanText(fragment: string): string {
@@ -68,9 +73,12 @@ function decodeEntities(text: string): string {
   const named = text.replace(/&(lt|gt|quot|#39|apos|nbsp);/g, (entity) => {
     return ENTITIES[entity] ?? entity;
   });
-  const numeric = named.replace(/&#(x[0-9a-f]+|\d+);/gi, (_entity, code: string) => {
+  const numeric = named.replace(/&#(x[0-9a-f]+|\d+);/gi, (entity, code: string) => {
     const isHex = code[0] === "x" || code[0] === "X";
     const value = isHex ? Number.parseInt(code.slice(1), 16) : Number(code);
+    if (value > MAX_CODE_POINT) {
+      return entity;
+    }
     return String.fromCodePoint(value);
   });
   // Last, so "&amp;lt;" stays the literal text "&lt;".

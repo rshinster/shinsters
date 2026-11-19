@@ -24,8 +24,10 @@ test("reads values from env", () => {
 });
 
 test("accepts the port range limits", () => {
-  assert.equal(loadConfig({ PORT: "1" }).port, 1);
-  assert.equal(loadConfig({ PORT: "65535" }).port, 65535);
+  const lowest = loadConfig({ PORT: "1" });
+  const highest = loadConfig({ PORT: "65535" });
+  assert.equal(lowest.port, 1);
+  assert.equal(highest.port, 65535);
 });
 
 test("rejects a port that is not only digits", () => {

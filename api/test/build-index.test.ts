@@ -9,9 +9,15 @@ import { readIndex, writeIndex } from "../src/index/store.ts";
 const FIXTURE_WEB = path.join(import.meta.dirname, "fixtures", "web");
 
 test("maps files to site urls", () => {
-  assert.equal(toUrl("index.html"), "/");
-  assert.equal(toUrl("about/index.html"), "/about/");
-  assert.equal(toUrl("notes.html"), "/notes.html");
+  const cases: [string, string][] = [
+    ["index.html", "/"],
+    ["about/index.html", "/about/"],
+    ["notes.html", "/notes.html"],
+  ];
+  for (const [file, url] of cases) {
+    const actual = toUrl(file);
+    assert.equal(actual, url);
+  }
 });
 
 test("indexes pages and skips 404 and redirects", async () => {
@@ -38,7 +44,8 @@ test("writes and reads back the index", async () => {
     const file = path.join(dir, "nested", "pages.json");
     const pages = await buildIndex(FIXTURE_WEB);
     await writeIndex(file, pages);
-    assert.deepEqual(await readIndex(file), pages);
+    const readBack = await readIndex(file);
+    assert.deepEqual(readBack, pages);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

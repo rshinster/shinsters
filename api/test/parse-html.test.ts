@@ -10,12 +10,14 @@ const PAGE = `<!doctype html>
   <style>p { color: red; }</style>
 </head>
 <body>
+  <nav class="site-nav"><a href="/">Home</a></nav>
   <!-- comment -->
   <h1>Main <em>title</em></h1>
   <h2 class="x">Section</h2>
   <h4>Too deep</h4>
   <p>One<span>Two</span></p>
   <script>const hidden = 1;</script>
+  <footer>© 2026 · <a href="/legal/">Legal</a></footer>
 </body>
 </html>`;
 
@@ -31,10 +33,10 @@ test("keeps h1 to h3 headings only", () => {
   assert.deepEqual(parsed.headings, ["Main title", "Section"]);
 });
 
-test("body text drops comments, scripts and styles", () => {
+test("body text drops comments, scripts, styles, nav and footer", () => {
   const parsed = parseHtml(PAGE);
-  assert.doesNotMatch(parsed.text, /comment|hidden|color/);
-  assert.match(parsed.text, /^Main title Section Too deep One Two$/);
+  assert.doesNotMatch(parsed.text, /comment|hidden|color|Home|Legal/);
+  assert.equal(parsed.text, "Main title Section Too deep One Two");
 });
 
 test("decodes entities", () => {
@@ -42,10 +44,16 @@ test("decodes entities", () => {
   assert.equal(parsed.text, "a & b <3 café A &lt;");
 });
 
+test("keeps an invalid numeric entity as text", () => {
+  const parsed = parseHtml("<body>x &#99999999; &#x110000; y</body>");
+  assert.equal(parsed.text, "x &#99999999; &#x110000; y");
+});
+
 test("detects redirects", () => {
   const redirect = parseHtml('<meta http-equiv="refresh" content="0; url=/x/">');
+  const normal = parseHtml(PAGE);
   assert.equal(redirect.isRedirect, true);
-  assert.equal(parseHtml(PAGE).isRedirect, false);
+  assert.equal(normal.isRedirect, false);
 });
 
 test("missing parts give empty values", () => {
