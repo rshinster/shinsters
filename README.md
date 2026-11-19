@@ -29,6 +29,8 @@ make api-lint     # check formatting and lint rules (Biome, read-only)
 make api-format   # apply Biome formatting and safe fixes
 make api-index    # index the pages of web/ into api/data/pages.json
 make api-search q="webserv"  # search the index from the terminal
+make api-mcp      # run the MCP server over stdio (for MCP clients)
+make api-inspect  # open MCP Inspector in the browser to try the tools
 ```
 
 Before each commit, run `make verify` (lint, type-check, tests, index of the real pages).
