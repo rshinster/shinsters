@@ -26,4 +26,5 @@ make api-install  # install dependencies
 make api-test     # run the tests
 make api-check    # type-check
 make api-index    # index the pages of web/ into api/data/pages.json
+make api-search q="webserv"  # search the index from the terminal
 ```

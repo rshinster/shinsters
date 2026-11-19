@@ -9,10 +9,14 @@
   "scripts": {
     "test": "node --test \"test/**/*.test.ts\"",
     "check": "tsc --noEmit",
-    "index": "node scripts/build-index.ts"
+    "index": "node scripts/build-index.ts",
+    "search": "node scripts/search.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
     "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "minisearch": "^7.2.0"
   }
 }
