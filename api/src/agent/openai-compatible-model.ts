@@ -1,12 +1,14 @@
 import { z } from "zod";
 import type { ModelConfig } from "../config.ts";
-import type { ChatMessage, Model, ModelRequest, ModelResponse, ToolCall } from "./model.ts";
+import type { ChatMessage, Model, ModelRequest, ModelResponse, ToolCall, Usage } from "./model.ts";
 
 // Caps one model call; a guide reply is a few sentences.
 export const MAX_OUTPUT_TOKENS = 1000;
 export const TIMEOUT_MS = 60_000;
 const ERROR_BODY_LENGTH = 300;
 const OMIT_REASONING_EFFORT = "omit";
+// Rough size of a token, used only when the provider reports no usage.
+const CHARACTERS_PER_TOKEN = 4;
 
 export class ModelError extends Error {}
 
@@ -49,7 +51,7 @@ export function createOpenAiCompatibleModel(config: ModelConfig): Model {
       if (!parsed.success) {
         throw new ModelError(`unexpected model response:\n${z.prettifyError(parsed.error)}`);
       }
-      return fromWireResponse(parsed.data);
+      return fromWireResponse(parsed.data, body);
     },
   };
 }
@@ -87,20 +89,33 @@ function toWireMessage(message: ChatMessage): Record<string, unknown> {
   return { role: message.role, content: message.content };
 }
 
-function fromWireResponse(response: WireResponse): ModelResponse {
+function fromWireResponse(response: WireResponse, requestBody: string): ModelResponse {
   const message = response.choices[0]?.message;
   const wireCalls = message?.tool_calls ?? [];
   const toolCalls: ToolCall[] = wireCalls.map((call) => {
     const input = parseArguments(call.function.arguments);
     return { id: call.id, name: call.function.name, input };
   });
+  const content = message?.content ?? "";
+  const usage = response.usage
+    ? { inputTokens: response.usage.prompt_tokens, outputTokens: response.usage.completion_tokens }
+    : estimateUsage({ requestBody, content, toolCalls });
+  return { content, toolCalls, usage };
+}
+
+interface UsageEstimate {
+  requestBody: string;
+  content: string;
+  toolCalls: ToolCall[];
+}
+
+// Without reported usage, the daily budget would never fill up: count a rough estimate instead.
+function estimateUsage(estimate: UsageEstimate): Usage {
+  const calls = JSON.stringify(estimate.toolCalls);
+  const outputLength = estimate.content.length + calls.length;
   return {
-    content: message?.content ?? "",
-    toolCalls,
-    usage: {
-      inputTokens: response.usage?.prompt_tokens ?? 0,
-      outputTokens: response.usage?.completion_tokens ?? 0,
-    },
+    inputTokens: Math.ceil(estimate.requestBody.length / CHARACTERS_PER_TOKEN),
+    outputTokens: Math.ceil(outputLength / CHARACTERS_PER_TOKEN),
   };
 }
 

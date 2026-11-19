@@ -148,14 +148,17 @@ describe("OpenAI-compatible model", () => {
     assert.deepEqual(response.usage, { inputTokens: 120, outputTokens: 15 });
   });
 
-  test("reads a text answer without usage", async () => {
-    const answer = { choices: [{ message: { content: "Hello.", tool_calls: null } }] };
+  test("without reported usage, estimates tokens so the budget still counts", async () => {
+    const answer = { choices: [{ message: { content: "Hello there.", tool_calls: null } }] };
     nextReply = { status: 200, body: JSON.stringify(answer) };
     const model = createOpenAiCompatibleModel(configWith({}));
     const response = await model.complete(REQUEST);
-    assert.equal(response.content, "Hello.");
+    const sentLength = JSON.stringify(received[0]?.body).length;
+    assert.equal(response.content, "Hello there.");
     assert.deepEqual(response.toolCalls, []);
-    assert.deepEqual(response.usage, { inputTokens: 0, outputTokens: 0 });
+    // 4 characters per token; output = "Hello there." (12) + "[]" (2).
+    assert.equal(response.usage.inputTokens, Math.ceil(sentLength / 4));
+    assert.equal(response.usage.outputTokens, 4);
   });
 
   test("HTTP errors, bad responses and an unreachable server throw ModelError", async () => {
