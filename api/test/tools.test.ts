@@ -48,12 +48,11 @@ describe("registry", () => {
     }
   });
 
-  test("search_pages schema: query required, limit optional with default", () => {
+  test("search_pages schema: query required, user optional, no limit", () => {
     const schema = toJsonSchema(searchPagesTool);
-    const properties = schema.properties as Record<string, Record<string, unknown>>;
+    const properties = Object.keys(schema.properties as object);
     assert.deepEqual(schema.required, ["query"]);
-    assert.equal(properties.limit?.default, 5);
-    assert.equal(properties.limit?.maximum, 10);
+    assert.deepEqual(properties, ["query", "user"]);
   });
 
   test("finds tools by name", () => {
@@ -121,11 +120,6 @@ describe("search_pages", () => {
       { query: "   " },
       { query: 42 },
       {},
-      { query: "a", limit: Number.NaN },
-      { query: "a", limit: 0 },
-      { query: "a", limit: 1000 },
-      { query: "a", limit: 2.7 },
-      { query: "a", limit: "3" },
       { query: "a", user: "" },
       { query: "a", user: 7 },
       "webserv",
@@ -137,11 +131,11 @@ describe("search_pages", () => {
     }
   });
 
-  test("accepts the limit range", async () => {
-    for (const limit of [1, 10]) {
-      const result = await searchPagesTool.call({ query: "e", limit }, anonymous);
-      assert.equal(result.ok, true, String(limit));
-    }
+  test("ignores a limit sent anyway and returns up to 5 results", async () => {
+    const result = await searchPagesTool.call({ query: "e", limit: 1 }, anonymous);
+    const data = dataOf(result);
+    const pages = data.pages as unknown[];
+    assert.ok(pages.length > 1 && pages.length <= 5, String(pages.length));
   });
 
   test("hides private pages from anonymous viewers only", async () => {

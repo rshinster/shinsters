@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DEFAULT_LIMIT, MAX_LIMIT, searchPages } from "../search/search-pages.ts";
+import { DEFAULT_LIMIT, searchPages } from "../search/search-pages.ts";
 import { defineTool, ToolError } from "./tool.ts";
 import { visibleUsers } from "./visible.ts";
 
@@ -18,20 +18,13 @@ const inputSchema = z.object({
     .toLowerCase()
     .optional()
     .describe('Only search the space of this user, e.g. "rshin". Names come from list_users.'),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(MAX_LIMIT)
-    .default(DEFAULT_LIMIT)
-    .describe("Maximum number of results to return."),
 });
 
 export const searchPagesTool = defineTool({
   name: "search_pages",
   description:
     "Keyword search over the pages and files (e.g. a resume PDF) of shinsters.fr. Returns " +
-    "matches (url, kind, owner, title, description), best first. Matching ignores case and " +
+    "up to 5 matches (url, kind, owner, title, description), best first. Matching ignores case and " +
     "accents and tolerates small typos, but not synonyms: if nothing is found, retry with " +
     "other words, in English or French.",
   inputSchema,
@@ -44,7 +37,8 @@ export const searchPagesTool = defineTool({
     }
     const results = await searchPages(context.engine, {
       query: input.query,
-      limit: input.limit,
+      // Fixed: models asked for 1 result and missed a file ranked second.
+      limit: DEFAULT_LIMIT,
       viewer: context.viewer,
       user: input.user,
     });

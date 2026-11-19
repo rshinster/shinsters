@@ -48,7 +48,7 @@ describe("MCP server (in memory)", () => {
     }
   });
 
-  test("search_pages schema keeps limit optional", async () => {
+  test("search_pages schema requires only the query", async () => {
     const listed = await client.listTools();
     const search = listed.tools.find((tool) => tool.name === "search_pages");
     assert.deepEqual(search?.inputSchema.required, ["query"]);
@@ -65,7 +65,7 @@ describe("MCP server (in memory)", () => {
     const result = await client.callTool({ name: "search_pages", arguments: { limit: 1000 } });
     const text = textOf(result);
     assert.equal(result.isError, true);
-    assert.match(text, /query|limit/);
+    assert.match(text, /query/);
   });
 
   test("private pages stay hidden over MCP", async () => {

@@ -2,7 +2,6 @@ import { canView, type Viewer } from "../access/viewer.ts";
 import type { SearchEngine, SearchResult } from "./engine.ts";
 
 export const DEFAULT_LIMIT = 5;
-export const MAX_LIMIT = 10;
 
 export interface SearchPagesOptions {
   query: string;
