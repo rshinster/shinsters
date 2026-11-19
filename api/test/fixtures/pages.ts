@@ -1,8 +1,11 @@
 import type { Page } from "../../src/index/page.ts";
 
+// Users: alice (profile + resume), bob (notes), carol (private content only).
 export const PAGES: Page[] = [
   {
     url: "/",
+    kind: "page",
+    owner: null,
     title: "Shinsters",
     description: "A modular web platform, built to grow.",
     lang: "en",
@@ -11,9 +14,11 @@ export const PAGES: Page[] = [
     visibility: "public",
   },
   {
-    url: "/profile/",
+    url: "/alice/profile/",
+    kind: "page",
+    owner: "alice",
     title: "Profile",
-    description: "Professional profile and resume.",
+    description: "Professional profile.",
     lang: "en",
     headings: ["Projects", "webserv", "Education", "École 42 Lyon"],
     text:
@@ -23,7 +28,20 @@ export const PAGES: Page[] = [
     visibility: "public",
   },
   {
-    url: "/notes/docker/",
+    url: "/alice/profile/resume.pdf",
+    kind: "file",
+    owner: "alice",
+    title: "Download resume (PDF)",
+    description: "File linked from Profile.",
+    lang: "en",
+    headings: [],
+    text: "",
+    visibility: "public",
+  },
+  {
+    url: "/bob/notes/docker/",
+    kind: "page",
+    owner: "bob",
     title: "Docker notes",
     description: "Notes on containers.",
     lang: "en",
@@ -33,6 +51,8 @@ export const PAGES: Page[] = [
   },
   {
     url: "/mentions-legales/",
+    kind: "page",
+    owner: null,
     title: "Mentions légales",
     description: "Mentions légales et données personnelles.",
     lang: "fr",
@@ -42,11 +62,24 @@ export const PAGES: Page[] = [
   },
   {
     url: "/members/roadmap/",
+    kind: "page",
+    owner: null,
     title: "Members roadmap",
     description: "Private plans.",
     lang: "en",
     headings: ["Roadmap"],
     text: "Secret roadmap: docker swarm migration.",
+    visibility: "private",
+  },
+  {
+    url: "/carol/drafts/",
+    kind: "page",
+    owner: "carol",
+    title: "Drafts",
+    description: "Unfinished work.",
+    lang: "en",
+    headings: ["Drafts"],
+    text: "Unfinished work, not ready to share.",
     visibility: "private",
   },
 ];

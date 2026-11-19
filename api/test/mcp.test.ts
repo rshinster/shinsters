@@ -38,10 +38,10 @@ describe("MCP server (in memory)", () => {
     await client.close();
   });
 
-  test("lists the three tools with descriptions and schemas", async () => {
+  test("lists the tools with descriptions and schemas", async () => {
     const listed = await client.listTools();
     const names = listed.tools.map((tool) => tool.name);
-    assert.deepEqual(names, ["search_pages", "get_page", "platform_info"]);
+    assert.deepEqual(names, ["search_pages", "get_page", "list_users", "platform_info"]);
     for (const tool of listed.tools) {
       assert.ok(tool.description, tool.name);
       assert.equal(tool.inputSchema.type, "object", tool.name);
@@ -58,7 +58,7 @@ describe("MCP server (in memory)", () => {
     const result = await client.callTool({ name: "search_pages", arguments: { query: "webserv" } });
     const data = JSON.parse(textOf(result));
     assert.equal(result.isError ?? false, false);
-    assert.equal(data.pages[0].url, "/profile/");
+    assert.equal(data.pages[0].url, "/alice/profile/");
   });
 
   test("bad input comes back as a tool error, not a crash", async () => {
@@ -110,7 +110,7 @@ describe("MCP server (real process over stdio)", () => {
     const listed = await client.listTools();
     const result = await client.callTool({ name: "platform_info", arguments: {} });
     const data = JSON.parse(textOf(result));
-    assert.equal(listed.tools.length, 3);
+    assert.equal(listed.tools.length, 4);
     assert.equal(data.name, "Shinsters");
   });
 });

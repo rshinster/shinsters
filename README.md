@@ -10,6 +10,7 @@ api/            API back-end in TypeScript (in progress, not deployed)
 ```
 
 Each user space has its own styles and self-contained modules (`web/<user>/<module>/`).
+A new space gets a button on the gateway (`web/index.html`) and its name in `USERS` (`api/src/site.ts`).
 
 ## Usage
 

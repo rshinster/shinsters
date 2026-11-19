@@ -17,7 +17,7 @@ export const getPageTool = defineTool({
   name: "get_page",
   description:
     "Read one page of shinsters.fr: title, description, language, headings and text. " +
-    "Use a url returned by search_pages or platform_info.",
+    'Use a url returned by another tool. A file (kind "file") has no text: offer its url.',
   inputSchema,
   async run(input, context) {
     const page = context.pages.get(input.url);
@@ -28,6 +28,8 @@ export const getPageTool = defineTool({
     const truncated = page.text.length > MAX_TEXT_LENGTH;
     return {
       url: page.url,
+      kind: page.kind,
+      owner: page.owner,
       title: page.title,
       description: page.description,
       lang: page.lang,

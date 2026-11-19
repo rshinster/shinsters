@@ -1,11 +1,17 @@
 // Regex-based: enough for our own hand-written pages, not for arbitrary HTML.
 
+export interface Link {
+  href: string;
+  text: string;
+}
+
 export interface ParsedHtml {
   title: string;
   description: string;
   lang: string;
   headings: string[];
   text: string;
+  links: Link[];
   isRedirect: boolean;
 }
 
@@ -21,12 +27,14 @@ const ENTITIES: Record<string, string> = {
 const MAX_CODE_POINT = 0x10ffff;
 
 export function parseHtml(html: string): ParsedHtml {
+  const content = readContent(html);
   return {
     title: cleanText(firstGroup(html, /<title[^>]*>([\s\S]*?)<\/title>/i)),
     description: cleanText(readMeta(html, "description")),
     lang: firstGroup(html, /<html[^>]*\blang="([^"]*)"/i),
     headings: readHeadings(html),
-    text: readBodyText(html),
+    text: cleanText(content),
+    links: readLinks(content),
     isRedirect: /<meta\s+http-equiv="refresh"/i.test(html),
   };
 }
@@ -56,11 +64,23 @@ function readHeadings(html: string): string[] {
 // Nav and footer repeat on every page, so they would make every page match their words.
 const NON_CONTENT = /<(script|style|nav|footer)\b[^>]*>[\s\S]*?<\/\1>/gi;
 
-function readBodyText(html: string): string {
+// Body HTML without comments, scripts, styles, nav and footer.
+function readContent(html: string): string {
   const body = firstGroup(html, /<body[^>]*>([\s\S]*)<\/body>/i) || html;
   const withoutComments = body.replace(/<!--[\s\S]*?-->/g, " ");
-  const content = withoutComments.replace(NON_CONTENT, " ");
-  return cleanText(content);
+  return withoutComments.replace(NON_CONTENT, " ");
+}
+
+function readLinks(content: string): Link[] {
+  const matches = content.matchAll(/<a\b[^>]*\bhref="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi);
+  const links: Link[] = [];
+  for (const match of matches) {
+    const rawHref = match[1] ?? "";
+    const href = decodeEntities(rawHref).trim();
+    const text = cleanText(match[2] ?? "");
+    links.push({ href, text });
+  }
+  return links;
 }
 
 function cleanText(fragment: string): string {

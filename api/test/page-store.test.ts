@@ -6,9 +6,9 @@ import { PAGES } from "./fixtures/pages.ts";
 const store = createPageStore(PAGES);
 
 test("finds a page by path, with or without trailing slash", () => {
-  for (const input of ["/profile/", "/profile", "  /profile/  "]) {
+  for (const input of ["/alice/profile/", "/alice/profile", "  /alice/profile/  "]) {
     const page = store.get(input);
-    assert.equal(page?.url, "/profile/", input);
+    assert.equal(page?.url, "/alice/profile/", input);
   }
 });
 

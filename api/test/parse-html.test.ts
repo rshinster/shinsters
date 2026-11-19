@@ -39,6 +39,20 @@ test("body text drops comments, scripts, styles, nav and footer", () => {
   assert.equal(parsed.text, "Main title Section Too deep One Two");
 });
 
+test("reads content links with clean text and decoded href", () => {
+  const html = `<body>
+    <nav><a href="/nav/">Nav</a></nav>
+    <a class="btn" href="cv.pdf?v=1&amp;x=2">Download <em>CV</em></a>
+    <a href="/empty/"></a>
+    <footer><a href="/legal/">Legal</a></footer>
+  </body>`;
+  const parsed = parseHtml(html);
+  assert.deepEqual(parsed.links, [
+    { href: "cv.pdf?v=1&x=2", text: "Download CV" },
+    { href: "/empty/", text: "" },
+  ]);
+});
+
 test("decodes entities", () => {
   const parsed = parseHtml("<body>a &amp; b &lt;3 caf&#233; &#x41; &amp;lt;</body>");
   assert.equal(parsed.text, "a & b <3 café A &lt;");

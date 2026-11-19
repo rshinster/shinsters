@@ -1,5 +1,5 @@
-import { SITE_ORIGIN } from "../site.ts";
 import type { Page } from "./page.ts";
+import { toSitePath } from "./site-path.ts";
 
 export interface PageStore {
   get(urlOrPath: string): Page | undefined;
@@ -31,24 +31,15 @@ export function createPageStore(pages: Page[]): PageStore {
 
 // Accepts "/rshin/profile/", "/rshin/profile" or "https://shinsters.fr/rshin/profile/".
 function toCandidatePaths(urlOrPath: string): string[] {
-  const site = new URL(SITE_ORIGIN);
-  const parsed = URL.parse(urlOrPath.trim(), SITE_ORIGIN);
-  if (!parsed || parsed.host !== site.host) {
+  const trimmed = urlOrPath.trim();
+  const path = toSitePath(trimmed, "/");
+  if (path === undefined) {
     return [];
   }
-  const path = decodePath(parsed.pathname);
   const lastSegment = path.split("/").at(-1) ?? "";
   const looksLikeFolder = !path.endsWith("/") && !lastSegment.includes(".");
   if (looksLikeFolder) {
     return [path, `${path}/`];
   }
   return [path];
-}
-
-function decodePath(pathname: string): string {
-  try {
-    return decodeURIComponent(pathname);
-  } catch {
-    return pathname;
-  }
 }

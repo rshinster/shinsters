@@ -3,6 +3,7 @@ import { before, describe, test } from "node:test";
 import { ANONYMOUS, type Viewer } from "../src/access/viewer.ts";
 import type { Page } from "../src/index/page.ts";
 import { getPageTool, MAX_TEXT_LENGTH } from "../src/tools/get-page-tool.ts";
+import { listUsersTool } from "../src/tools/list-users-tool.ts";
 import { platformInfoTool } from "../src/tools/platform-info-tool.ts";
 import { createToolContext, findTool, TOOLS } from "../src/tools/registry.ts";
 import { searchPagesTool } from "../src/tools/search-pages-tool.ts";
@@ -64,20 +65,54 @@ describe("registry", () => {
 });
 
 describe("search_pages", () => {
-  test("returns url, title and description, with a default limit", async () => {
+  test("returns url, kind, owner, title and description", async () => {
     const result = await searchPagesTool.call({ query: "webserv" }, anonymous);
     const data = dataOf(result);
     const pages = data.pages as Record<string, unknown>[];
-    const fields = Object.keys(pages[0] ?? {});
-    assert.equal(pages[0]?.url, "/profile/");
-    assert.deepEqual(fields, ["url", "title", "description"]);
+    assert.deepEqual(pages[0], {
+      url: "/alice/profile/",
+      kind: "page",
+      owner: "alice",
+      title: "Profile",
+      description: "Professional profile.",
+    });
+  });
+
+  test("filters by user", async () => {
+    const result = await searchPagesTool.call({ query: "webserv", user: "bob" }, anonymous);
+    const data = dataOf(result);
+    const urls = (data.pages as { url: string }[]).map((page) => page.url);
+    assert.deepEqual(urls, ["/bob/notes/docker/"]);
+  });
+
+  test("user names ignore case", async () => {
+    const result = await searchPagesTool.call({ query: "webserv", user: " Bob " }, anonymous);
+    const data = dataOf(result);
+    const urls = (data.pages as { url: string }[]).map((page) => page.url);
+    assert.deepEqual(urls, ["/bob/notes/docker/"]);
+  });
+
+  test("unknown and hidden users give the same error", async () => {
+    const unknown = await searchPagesTool.call({ query: "x", user: "nobody" }, anonymous);
+    const hidden = await searchPagesTool.call({ query: "x", user: "carol" }, anonymous);
+    const unknownError = errorOf(unknown);
+    const hiddenError = errorOf(hidden);
+    assert.equal(unknownError, "No user named nobody. Use list_users to see the users.");
+    assert.equal(hiddenError, "No user named carol. Use list_users to see the users.");
+  });
+
+  test("members can filter on a user with only private content", async () => {
+    const result = await searchPagesTool.call({ query: "drafts", user: "carol" }, member);
+    const data = dataOf(result);
+    const pages = data.pages as unknown[];
+    assert.equal(pages.length, 1);
   });
 
   test("trims the query", async () => {
     const result = await searchPagesTool.call({ query: "  docker  " }, anonymous);
     const data = dataOf(result);
     const pages = data.pages as Record<string, unknown>[];
-    assert.equal(pages[0]?.url, "/notes/docker/");
+    assert.equal(pages[0]?.url, "/bob/notes/docker/");
   });
 
   test("rejects bad input with a readable error", async () => {
@@ -91,6 +126,8 @@ describe("search_pages", () => {
       { query: "a", limit: 1000 },
       { query: "a", limit: 2.7 },
       { query: "a", limit: "3" },
+      { query: "a", user: "" },
+      { query: "a", user: 7 },
       "webserv",
     ];
     for (const input of badInputs) {
@@ -120,9 +157,9 @@ describe("search_pages", () => {
 
 describe("get_page", () => {
   test("returns the page content", async () => {
-    const result = await getPageTool.call({ url: "/profile" }, anonymous);
+    const result = await getPageTool.call({ url: "/alice/profile" }, anonymous);
     const data = dataOf(result);
-    assert.equal(data.url, "/profile/");
+    assert.equal(data.url, "/alice/profile/");
     assert.equal(data.lang, "en");
     assert.equal(data.truncated, false);
     assert.match(String(data.text), /webserv/);
@@ -137,6 +174,14 @@ describe("get_page", () => {
     assert.equal(missingError, "No page at /members/nothing/.");
   });
 
+  test("returns a linked file with its kind and owner", async () => {
+    const result = await getPageTool.call({ url: "/alice/profile/resume.pdf" }, anonymous);
+    const data = dataOf(result);
+    assert.equal(data.kind, "file");
+    assert.equal(data.owner, "alice");
+    assert.equal(data.text, "");
+  });
+
   test("members can read private pages", async () => {
     const result = await getPageTool.call({ url: "/members/roadmap/" }, member);
     const data = dataOf(result);
@@ -146,6 +191,8 @@ describe("get_page", () => {
   test("long text is truncated and flagged", async () => {
     const longPage: Page = {
       url: "/long/",
+      kind: "page",
+      owner: null,
       title: "Long",
       description: "",
       lang: "en",
@@ -167,23 +214,50 @@ describe("get_page", () => {
   });
 });
 
+describe("list_users", () => {
+  test("lists users with their visible pages and files", async () => {
+    const result = await listUsersTool.call({}, anonymous);
+    const data = dataOf(result);
+    assert.deepEqual(data.users, [
+      {
+        name: "alice",
+        pages: [
+          { url: "/alice/profile/", kind: "page", title: "Profile" },
+          { url: "/alice/profile/resume.pdf", kind: "file", title: "Download resume (PDF)" },
+        ],
+      },
+      {
+        name: "bob",
+        pages: [{ url: "/bob/notes/docker/", kind: "page", title: "Docker notes" }],
+      },
+    ]);
+  });
+
+  test("a user with only private content appears to members only", async () => {
+    const result = await listUsersTool.call({}, member);
+    const data = dataOf(result);
+    const names = (data.users as { name: string }[]).map((user) => user.name);
+    assert.deepEqual(names, ["alice", "bob", "carol"]);
+  });
+});
+
 describe("platform_info", () => {
-  test("describes the site with its visible pages", async () => {
+  test("describes the site, its users and its own pages only", async () => {
     const result = await platformInfoTool.call({}, anonymous);
     const data = dataOf(result);
     const urls = (data.pages as { url: string }[]).map((page) => page.url);
     assert.equal(data.name, "Shinsters");
     assert.equal(data.url, "https://shinsters.fr");
     assert.equal(data.description, "A modular web platform, built to grow.");
-    const hasPrivate = urls.includes("/members/roadmap/");
-    assert.equal(hasPrivate, false);
+    assert.deepEqual(data.users, ["alice", "bob"]);
+    assert.deepEqual(urls, ["/", "/mentions-legales/"]);
   });
 
-  test("members also see private pages", async () => {
+  test("members also see private site pages and users", async () => {
     const result = await platformInfoTool.call({}, member);
     const data = dataOf(result);
     const urls = (data.pages as { url: string }[]).map((page) => page.url);
-    const hasPrivate = urls.includes("/members/roadmap/");
-    assert.equal(hasPrivate, true);
+    assert.deepEqual(data.users, ["alice", "bob", "carol"]);
+    assert.deepEqual(urls, ["/", "/mentions-legales/", "/members/roadmap/"]);
   });
 });

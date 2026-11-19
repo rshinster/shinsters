@@ -15,7 +15,7 @@ export async function createMiniSearchEngine(pages: Page[]): Promise<SearchEngin
   const index = new MiniSearch<Page>({
     idField: "url",
     fields: SEARCH_FIELDS,
-    storeFields: ["url", "title", "description", "visibility"],
+    storeFields: ["url", "kind", "owner", "title", "description", "visibility"],
     extractField: readField,
     processTerm: normalizeTerm,
     searchOptions: {
@@ -32,6 +32,8 @@ export async function createMiniSearchEngine(pages: Page[]): Promise<SearchEngin
       const results = hits.map((hit) => {
         return {
           url: hit.url,
+          kind: hit.kind,
+          owner: hit.owner,
           title: hit.title,
           description: hit.description,
           visibility: hit.visibility,

@@ -1,7 +1,9 @@
-import type { Visibility } from "../index/page.ts";
+import type { Kind, Visibility } from "../index/page.ts";
 
 export interface SearchResult {
   url: string;
+  kind: Kind;
+  owner: string | null;
   title: string;
   description: string;
   visibility: Visibility;
