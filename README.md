@@ -33,6 +33,7 @@ make api-search q="webserv"  # search the index from the terminal
 make api-mcp      # run the MCP server over stdio (for MCP clients)
 make api-inspect  # open MCP Inspector in the browser to try the tools
 make api-chat     # chat with the guide agent in the terminal (local Ollama by default)
+make api-eval     # score the agent on behaviour cases (EVAL_RUNS=3 to repeat each)
 ```
 
 The agent talks to any OpenAI-compatible chat API, set with `MODEL_BASE_URL`, `MODEL_NAME`,
