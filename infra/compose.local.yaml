@@ -1,0 +1,12 @@
+# Dev override: use the Ollama running on this machine (it listens on 127.0.0.1 only).
+# The container shares the host network, so it reaches Ollama without exposing it, and the
+# API listens on 127.0.0.1:3000 of this machine only.
+services:
+  api:
+    network_mode: host
+    ports: !reset []
+    environment:
+      HOST: 127.0.0.1
+      MODEL_BASE_URL: ${MODEL_BASE_URL:-http://127.0.0.1:11434/v1}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8080}
+      TRUST_PROXY: "false"

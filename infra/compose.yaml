@@ -1,0 +1,33 @@
+# API service, shaped for the server: a reverse proxy on the same host forwards to 127.0.0.1:3000.
+# Settings come from the environment (or an .env file next to this one, never committed).
+# On a dev machine with Ollama, add compose.local.yaml (see the README).
+name: shinsters-api
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: api/Dockerfile
+    image: shinsters-api
+    restart: unless-stopped
+    init: true
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      MODEL_BASE_URL: ${MODEL_BASE_URL:-}
+      MODEL_NAME: ${MODEL_NAME:-}
+      MODEL_API_KEY: ${MODEL_API_KEY:-}
+      MODEL_REASONING_EFFORT: ${MODEL_REASONING_EFFORT:-}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://shinsters.fr}
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-}
+      DAILY_TOKEN_BUDGET: ${DAILY_TOKEN_BUDGET:-}
+      CHAT_ENABLED: ${CHAT_ENABLED:-}
+      TRUST_PROXY: ${TRUST_PROXY:-true}
+    # The app only reads files: nothing to write, no extra privileges.
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256m
+    pids_limit: 100

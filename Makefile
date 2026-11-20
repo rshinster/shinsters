@@ -3,7 +3,7 @@ TYPST ?= typst
 CV_PDF := web/rshin/profile/resume.pdf
 CV_ARGS := --root . --input data=/content/cv/cv.yaml templates/cv/cv.typ $(CV_PDF)
 
-.PHONY: serve cv cv-watch cv-final api-install api-test api-check api-index api-search api-lint api-format api-mcp api-inspect api-chat api-eval api-serve verify
+.PHONY: serve cv cv-watch cv-final api-install api-test api-check api-index api-search api-lint api-format api-mcp api-inspect api-chat api-eval api-serve api-up api-down api-logs verify
 
 serve:
 	python3 -m http.server $(PORT) -d web
@@ -53,6 +53,18 @@ api-eval:
 
 api-serve:
 	cd api && npm run -s serve
+
+# The API in Docker on this machine, using the local Ollama (infra/compose.local.yaml).
+COMPOSE_LOCAL := docker compose -f infra/compose.yaml -f infra/compose.local.yaml
+
+api-up:
+	$(COMPOSE_LOCAL) up -d --build
+
+api-down:
+	$(COMPOSE_LOCAL) down
+
+api-logs:
+	$(COMPOSE_LOCAL) logs -f api
 
 # Run before each commit; read-only except the git-ignored index.
 verify: api-lint api-check api-test api-index

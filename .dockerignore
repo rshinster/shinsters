@@ -1,0 +1,8 @@
+# Allowlist: only what the API image needs enters the build context.
+# Everything else (.env, content/, .claude/, .git, node_modules…) stays out.
+*
+!api/package.json
+!api/package-lock.json
+!api/src/
+!api/scripts/
+!web/
